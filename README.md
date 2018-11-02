@@ -3,11 +3,11 @@ Wrapper for the [Ravelry API](https://www.ravelry.com) using Flask
 
 ## Getting Started
 
-0. You need python and pip
+0. You need python3 and pip
 
 1. Install dependencies
 
-``
+```
 pip install -r requirements.txt
 ```
 
