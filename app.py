@@ -22,13 +22,13 @@ class Users(Resource):
 class Patterns(Resource):
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('pc', type=str)
-        parser.add_argument('weight', type=str)
-        parser.add_argument('view', type=str)
-        parser.add_argument('sort', type=str)
-        parser.add_argument('fit', type=str)
-        parser.add_argument('craft', type=str)
-        parser.add_argument('colors', type=int, help='Colors must be an integer')
+        parser.add_argument('pc', type=str, default='')
+        parser.add_argument('weight', type=str, default='')
+        parser.add_argument('view', type=str, default='captioned_thumbs')
+        parser.add_argument('sort', type=str, default='')
+        parser.add_argument('fit', type=str, default='')
+        parser.add_argument('craft', type=str, default='knitting')
+        parser.add_argument('colors', type=int, default=3, help='Colors must be an integer')
         args = parser.parse_args()
 
         pc = args['pc']
