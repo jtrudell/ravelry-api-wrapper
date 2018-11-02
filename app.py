@@ -1,37 +1,50 @@
-from flask import Flask
-from flask import jsonify
-from flask import request
+from flask import Flask, request
+from flask_restful import Resource, Api, reqparse
 import requests
 import os
 
 RAVELRY_USERNAME=os.getenv('RAVELRY_USERNAME')
 RAVELRY_PASSWORD=os.getenv('RAVELRY_PASSWORD')
+DEBUG=os.getenv('DEBUG', 'True') == 'True'
 
 app = Flask(__name__)
+api = Api(app)
 
-@app.route('/')
-def index():
-    return "Wrapper for Ravlery API"
+class Index(Resource):
+    def get(self):
+        return "Wrapper for Ravlery API"
 
-@app.route('/users/<name>')
-def users(name=''):
-    res = requests.get('https://api.ravelry.com/people/{}.json'.format(name), auth=requests.auth.HTTPBasicAuth(RAVELRY_USERNAME, RAVELRY_PASSWORD))
-    return res.content
+class Users(Resource):
+    def get(self, name):
+        res = requests.get('https://api.ravelry.com/people/{}.json'.format(name), auth=requests.auth.HTTPBasicAuth(RAVELRY_USERNAME, RAVELRY_PASSWORD))
+        return res.json()
 
-@app.route('/patterns')
-def patterns():
-    query = request.args
-    pc = query.get('pc', '')
-    weight = query.get('weight', '')
-    view = query.get('view', '')
-    sort = query.get('sort', '')
-    fit = query.get('fit', '')
-    craft = query.get('craft', '')
-    colors = query.get('colors', '')
+class Patterns(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('pc', type=str)
+        parser.add_argument('weight', type=str)
+        parser.add_argument('view', type=str)
+        parser.add_argument('sort', type=str)
+        parser.add_argument('fit', type=str)
+        parser.add_argument('craft', type=str)
+        parser.add_argument('colors', type=int, help='Colors must be an integer')
+        args = parser.parse_args()
 
-    res = requests.get('https://api.ravelry.com/patterns/search.json?pc={}&weight={}&view={}&sort={}&fit={}&craft={}&colors={}'.format(pc, weight, view, sort, fit, craft, colors), auth=requests.auth.HTTPBasicAuth(RAVELRY_USERNAME, RAVELRY_PASSWORD))
-    return res.content
+        pc = args['pc']
+        weight = args['weight']
+        view = args['view']
+        sort = args['sort']
+        fit = args['fit']
+        craft = args['craft']
+        colors = args['colors']
+        res = requests.get('https://api.ravelry.com/patterns/search.json?pc={}&weight={}&view={}&sort={}&fit={}&craft={}&colors={}'.format(pc, weight, view, sort, fit, craft, colors), auth=requests.auth.HTTPBasicAuth(RAVELRY_USERNAME, RAVELRY_PASSWORD))
+
+        return res.json()
+
+api.add_resource(Index, '/')
+api.add_resource(Users, '/users/<string:name>')
+api.add_resource(Patterns, '/patterns')
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
+    app.run(debug=DEBUG)
